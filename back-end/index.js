@@ -21,7 +21,7 @@ passport.use(new LocalStrategy(User.authenticate()));
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
-mongoose.connect('mongodb://localhost/oingpong-dev', function (err) {
+mongoose.connect('mongodb://localhost/pingpong-dev',  (err) => {
     if (err) {
         console.log('Could not connect to mongodb on localhost. Ensure that you have mongodb running on localhost and mongodb accepts connections on standard ports!');
     }
@@ -32,6 +32,6 @@ app.use('/', require('./routes'));
 
 app.set('port', process.env.PORT || 3000);
 
-var server = app.listen(app.get('port'), function () {
+const server = app.listen(app.get('port'),  () => {
     console.log('App listening on port ', server.address().port);
 });
