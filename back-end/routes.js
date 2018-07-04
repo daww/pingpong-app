@@ -22,7 +22,7 @@ router.post('/register', (req, res, next) => {
         return next(err);
       }
 
-      console.log('user registered!');
+      console.log(`${req.body.username} registered!`);
 
       res.redirect('/');
     },
@@ -131,12 +131,12 @@ router.post('/registermatch', async (req, res) => {
       playerOne: {
         id: playerOne._id,
         ratingBefore: playerOne.rating[0],
-        ratingAfter: players[0][0].rating,
+        ratingAfter: players[0][0],
       },
       playerTwo: {
         id: playerTwo._id,
         ratingBefore: playerTwo.rating[0],
-        ratingAfter: players[1][0].rating,
+        ratingAfter: players[1][0],
       },
       results: req.body.games,
     });
@@ -145,7 +145,51 @@ router.post('/registermatch', async (req, res) => {
       if (err) {
         console.log(err);
       }
+      const matchId = match._id;
       res.send(console.log('Game saved.'));
+
+      // TODO find a way so that we do not have to get the user twice in order to save
+      User.findById(req.body.playerOneId, (err, user) => {
+        if (err) {
+          console.log('Could not retrieve user');
+          return null;
+        }
+        const userRating = user.rating;
+        userRating.unshift(players[0][0].rating);
+        user.set({
+          rating: userRating.slice(0, 9),
+          matches: user.matches.push(matchId),
+        });
+        user.save((err) => {
+          if (err) {
+            console.log(`error saving ${user.username} match`);
+          } else {
+            console.log(`Saved match in ${user.username} profile`);
+          }
+        });
+      });
+
+      // TODO find a way so that we do not have to get the user twice in order to save
+      User.findById(req.body.playerTwoId, (err, user) => {
+        if (err) {
+          console.log('Could not retrieve user');
+          return null;
+        }
+
+        const userRating = user.rating;
+        userRating.unshift(players[1][0].rating);
+        user.set({
+          rating: userRating.slice(0, 9),
+          matches: user.matches.push(matchId),
+        });
+        user.save((err) => {
+          if (err) {
+            console.log(`error saving ${user.username} match`);
+          } else {
+            console.log(`Saved match in ${user.username} profile`);
+          }
+        });
+      });
     });
   }
 });
