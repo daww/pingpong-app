@@ -6,13 +6,13 @@ const Match = new Schema({
   date: String,
   playerOne: {
     id: String,
-    rankingBefore: String,
-    rankingAfter: String,
+    ratingBefore: Object,
+    ratingAfter: Object,
   },
   playerTwo: {
     id: String,
-    rankingBefore: String,
-    rankingAfter: String,
+    ratingBefore: Object,
+    ratingAfter: Object,
   },
   results: [
     {

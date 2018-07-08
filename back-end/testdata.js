@@ -94,10 +94,34 @@ setTimeout(() => {
         },
         callback,
       );
-      
     }, 2000);
+    setTimeout(() => {
+      request(
+        {
+          method: 'POST',
+          url: 'http://localhost:3000/registerduomatch',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          json: {
+            teamOne: {
+              playerOneId: ids[1],
+              playerTwoId: ids[3],
+            },
+            teamTwo: {
+              playerOneId: ids[2],
+              playerTwoId: ids[4],
+            },
+            games: [
+              {
+                teamOneScore: 11,
+                teamTwoScore: 6,
+              },
+            ],
+          },
+        },
+        callback,
+      );
+    }, 4000);
   });
 }, 5000);
-
-
-// @TODO get users and do some test matches

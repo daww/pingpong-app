@@ -1,52 +1,27 @@
 const passport = require('passport');
 const router = require('express').Router();
-const trueSkill = require('com.izaakschroeder.trueskill').create();
+const userController = require('./controllers/user');
+const matchController = require('./controllers/match');
+const duoMatchController = require('./controllers/duomatch');
 const User = require('./models/user');
-const Match = require('./models/match');
 
 router.get('/', (req, res) => {
   res.render('index', { user: req.user });
 });
 
-router.post('/register', (req, res, next) => {
+router.post('/register', async (req, res, next) => {
   console.log('registering user');
-  User.register(
-    new User({
-      username: req.body.username,
-      rating: [trueSkill.createRating()],
-    }),
-    req.body.password,
-    (err) => {
-      if (err) {
-        console.log('error while user register!', err);
-        return next(err);
-      }
-
-      console.log(`${req.body.username} registered!`);
-
-      res.redirect('/');
-    },
-  );
+  const user = await userController.register(req.body.username, req.body.password);
+  res.send(user);
 });
 
-router.post('/editprofile', (req, res) => {
-  User.findById(req.body.userId, (err, user) => {
-    if (err) {
-      return console.log('Could not retrieve user');
-    }
-    user.set({
-      nickName: req.body.nickName,
-      firstkName: req.body.firstName,
-      lastName: req.body.lastName,
-    });
-    user.save((err, updatedUser) => {
-      if (err) {
-        return console.log('Error updating user');
-      }
-      console.log('Updated user');
-      res.redirect('/');
-    });
+router.post('/editprofile', async (req, res) => {
+  const updatedUser = await userController.register(req.body.userId, {
+    nickName: req.body.nickName,
+    firstkName: req.body.firstName,
+    lastName: req.body.lastName,
   });
+  res.send(updatedUser);
 });
 
 router.post('/login', passport.authenticate('local'), (req, res) => {
@@ -65,7 +40,6 @@ router.get('/users', (req, res) => {
     }
     res.send(JSON.stringify(results));
   });
-  // res.redirect('/');
 });
 
 /**
@@ -86,112 +60,25 @@ router.post('/registermatch', async (req, res) => {
     return console.log('Incomplete data for registering a match');
   }
 
-  const playerOne = await User.findById(
+  const match = await matchController.registerMatch(
     req.body.playerOneId,
-    'username rating _id',
-    { lean: true },
-    (err, user) => {
-      if (err) {
-        console.log('Could not retrieve user');
-        return null;
-      }
-      return user;
-    },
-  );
-
-  const playerTwo = await User.findById(
     req.body.playerTwoId,
-    'username rating _id',
-    { lean: true },
-    (err, user) => {
-      if (err) {
-        console.log('Could not retrieve user');
-        return null;
-      }
-      return user;
-    },
+    req.body.games,
   );
+  res.send(match);
+});
 
-  if (playerOne && playerTwo) {
-    // one player teams, get the newest rating
-    const players = [[playerOne.rating[0]], [playerTwo.rating[0]]];
-    req.body.games.forEach((game) => {
-      let newRating;
-      if (game.playerOneScore > game.playerTwoScore) {
-        newRating = trueSkill.update(players, [1, 0]);
-      } else if (game.playerTwoScore > game.playerOneScore) {
-        newRating = trueSkill.update(players, [0, 1]);
-      }
-      players[0][0].rating = newRating[0][0];
-      players[1][0].rating = newRating[1][0];
-    });
-
-    const newMatch = new Match({
-      date: Date.now(),
-      playerOne: {
-        id: playerOne._id,
-        ratingBefore: playerOne.rating[0],
-        ratingAfter: players[0][0],
-      },
-      playerTwo: {
-        id: playerTwo._id,
-        ratingBefore: playerTwo.rating[0],
-        ratingAfter: players[1][0],
-      },
-      results: req.body.games,
-    });
-
-    newMatch.save((err, match) => {
-      if (err) {
-        console.log(err);
-      }
-      const matchId = match._id;
-      res.send(console.log('Game saved.'));
-
-      // TODO find a way so that we do not have to get the user twice in order to save
-      User.findById(req.body.playerOneId, (err, user) => {
-        if (err) {
-          console.log('Could not retrieve user');
-          return null;
-        }
-        const userRating = user.rating;
-        userRating.unshift(players[0][0].rating);
-        user.set({
-          rating: userRating.slice(0, 9),
-          matches: user.matches.push(matchId),
-        });
-        user.save((err) => {
-          if (err) {
-            console.log(`error saving ${user.username} match`);
-          } else {
-            console.log(`Saved match in ${user.username} profile`);
-          }
-        });
-      });
-
-      // TODO find a way so that we do not have to get the user twice in order to save
-      User.findById(req.body.playerTwoId, (err, user) => {
-        if (err) {
-          console.log('Could not retrieve user');
-          return null;
-        }
-
-        const userRating = user.rating;
-        userRating.unshift(players[1][0].rating);
-        user.set({
-          rating: userRating.slice(0, 9),
-          matches: user.matches.push(matchId),
-        });
-        user.save((err) => {
-          if (err) {
-            console.log(`error saving ${user.username} match`);
-          } else {
-            console.log(`Saved match in ${user.username} profile`);
-          }
-        });
-      });
-    });
+router.post('/registerduomatch', async (req, res) => {
+  if (!req.body.teamOne || !req.body.teamTwo || !req.body.games) {
+    return console.log('Incomplete data for registering a match');
   }
+
+  const match = await duoMatchController.registerDuoMatch(
+    req.body.teamOne,
+    req.body.teamTwo,
+    req.body.games,
+  );
+  res.send(match);
 });
 
 module.exports = router;
