@@ -1,5 +1,5 @@
-const User = require('../models/user');
 const trueSkill = require('com.izaakschroeder.trueskill').create();
+const User = require('../models/user');
 
 const userController = {
   register: (username, password) => {

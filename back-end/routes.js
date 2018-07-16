@@ -1,13 +1,25 @@
 const passport = require('passport');
 const router = require('express').Router();
+const jwt = require('jsonwebtoken');
 const userController = require('./controllers/user');
 const matchController = require('./controllers/match');
 const duoMatchController = require('./controllers/duomatch');
 const User = require('./models/user');
 
-router.get('/', (req, res) => {
-  res.render('index', { user: req.user });
-});
+const getToken = (headers) => {
+  if (headers && headers.authorization) {
+    const parted = headers.authorization.split(' ');
+    if (parted.length === 2) {
+      return parted[1];
+    }
+    return null;
+  }
+  return null;
+};
+
+// router.get('/', (req, res) => {
+//   res.render('index', { user: req.user });
+// });
 
 router.post('/register', async (req, res, next) => {
   console.log('registering user');
@@ -16,16 +28,24 @@ router.post('/register', async (req, res, next) => {
 });
 
 router.post('/editprofile', async (req, res) => {
-  const updatedUser = await userController.register(req.body.userId, {
-    nickName: req.body.nickName,
-    firstkName: req.body.firstName,
-    lastName: req.body.lastName,
-  });
-  res.send(updatedUser);
+  const token = getToken(req.headers);
+
+  if (token) {
+    const updatedUser = await userController.register(req.body.userId, {
+      nickName: req.body.nickName,
+      firstkName: req.body.firstName,
+      lastName: req.body.lastName,
+    });
+    res.send(updatedUser);
+  } else {
+    return res.status(403).send({ success: false, msg: 'Unauthorized.' });
+  }
 });
 
 router.post('/login', passport.authenticate('local'), (req, res) => {
-  res.redirect('/');
+  const token = JSON.stringify(jwt.sign(req.body.username, 'poepchinees'));
+  // return the information including token as JSON
+  res.json({ success: true, token: `JWT ${token}` });
 });
 
 router.get('/logout', (req, res) => {
@@ -34,12 +54,18 @@ router.get('/logout', (req, res) => {
 });
 
 router.get('/users', (req, res) => {
-  User.find((err, results) => {
-    if (err) {
-      return console.log(err);
-    }
-    res.send(JSON.stringify(results));
-  });
+  const token = getToken(req.headers);
+
+  if (token) {
+    User.find((err, results) => {
+      if (err) {
+        return console.log(err);
+      }
+      res.send(JSON.stringify(results));
+    });
+  } else {
+    return res.status(403).send({ success: false, msg: 'Unauthorized.' });
+  }
 });
 
 /**
@@ -56,29 +82,41 @@ router.get('/users', (req, res) => {
  */
 
 router.post('/registermatch', async (req, res) => {
-  if (!req.body.playerOneId || !req.body.playerTwoId || !req.body.games) {
-    return console.log('Incomplete data for registering a match');
-  }
+  const token = getToken(req.headers);
 
-  const match = await matchController.registerMatch(
-    req.body.playerOneId,
-    req.body.playerTwoId,
-    req.body.games,
-  );
-  res.send(match);
+  if (token) {
+    if (!req.body.playerOneId || !req.body.playerTwoId || !req.body.games) {
+      return console.log('Incomplete data for registering a match');
+    }
+
+    const match = await matchController.registerMatch(
+      req.body.playerOneId,
+      req.body.playerTwoId,
+      req.body.games,
+    );
+    res.send(match);
+  } else {
+    return res.status(403).send({ success: false, msg: 'Unauthorized.' });
+  }
 });
 
 router.post('/registerduomatch', async (req, res) => {
-  if (!req.body.teamOne || !req.body.teamTwo || !req.body.games) {
-    return console.log('Incomplete data for registering a match');
-  }
+  const token = getToken(req.headers);
 
-  const match = await duoMatchController.registerDuoMatch(
-    req.body.teamOne,
-    req.body.teamTwo,
-    req.body.games,
-  );
-  res.send(match);
+  if (token) {
+    if (!req.body.teamOne || !req.body.teamTwo || !req.body.games) {
+      return console.log('Incomplete data for registering a match');
+    }
+
+    const match = await duoMatchController.registerDuoMatch(
+      req.body.teamOne,
+      req.body.teamTwo,
+      req.body.games,
+    );
+    res.send(match);
+  } else {
+    return res.status(403).send({ success: false, msg: 'Unauthorized.' });
+  }
 });
 
 module.exports = router;
