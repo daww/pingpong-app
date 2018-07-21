@@ -10,6 +10,8 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Rankings from "./pages/Rankings";
 import DuoRankings from "./pages/DuoRankings";
+import UserDetail from "./pages/UserDetail";
+import Preferences from "./pages/Preferences";
 import PrivateRoute from "./PrivateRoute";
 import Menu from "./Menu";
 import axios from "axios";
@@ -27,6 +29,26 @@ class App extends React.Component {
     axios.defaults.headers.common["Authorization"] = localStorage.getItem(
       "jwtToken"
     );
+    const userName = localStorage.getItem("userName");
+    const userId = localStorage.getItem("userId");
+    const token = localStorage.getItem("jwtToken");
+
+    this.setState({
+      isAuthenticated: token ? token : null,
+      username: userName ? userName : null,
+      userId: userId ? userId : null
+    });
+  };
+
+  onLogout = () => {
+    this.setState({
+      isAuthenticated: false
+    });
+    localStorage.removeItem("jwtToken");
+    localStorage.removeItem("userName");
+    localStorage.removeItem("userId");
+
+    window.location = "/";
   };
 
   onLoginClick = () => {
@@ -36,8 +58,12 @@ class App extends React.Component {
         password: this.state.password
       })
       .then(response => {
+        localStorage.setItem("jwtToken", response.data.token);
+        localStorage.setItem("userName", this.state.username);
+        localStorage.setItem("userId", response.data.userId);
         this.setState({
-          isAuthenticated: true
+          isAuthenticated: true,
+          userId: response.data.userId
         });
       })
       .catch(error => {
@@ -72,6 +98,9 @@ class App extends React.Component {
           <Menu
             activeItem={"bla"}
             isAuthenticated={this.state.isAuthenticated}
+            onLogout={this.onLogout}
+            userName={this.state.username}
+            userId={this.state.userId}
           />
 
           <Container>
@@ -109,6 +138,16 @@ class App extends React.Component {
               path="/duorankings"
               isAuthenticated={this.state.isAuthenticated}
               component={DuoRankings}
+            />
+            <PrivateRoute
+              path="/user/:id"
+              isAuthenticated={this.state.isAuthenticated}
+              component={UserDetail}
+            />
+            <PrivateRoute
+              path="/preferences/:id"
+              isAuthenticated={this.state.isAuthenticated}
+              component={Preferences}
             />
           </Container>
         </div>

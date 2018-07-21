@@ -3,7 +3,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 
 export default props => {
-  const { activeItem, isAuthenticated } = props;
+  const { activeItem, isAuthenticated, onLogout, userName, userId } = props;
   return (
     <Menu>
       <Link to="/">
@@ -16,9 +16,19 @@ export default props => {
         <Menu.Item name="duorankings" active={activeItem === "duorankings"} />
       </Link>
       <Menu.Menu position="right">
-        <Link to={isAuthenticated ? "/logout" : "/login"}>
-          <Menu.Item name={isAuthenticated ? "logout" : "login"} />
-        </Link>
+        {isAuthenticated ? (
+          <React.Fragment>
+            <Link to={`/preferences/${userId}`}>
+              <Menu.Item name="preferences" />
+            </Link>
+            {userName && <Menu.Item>Hello, {userName}</Menu.Item>}
+            <Menu.Item name="logout" onClick={onLogout} />
+          </React.Fragment>
+        ) : (
+          <Link to="/login">
+            <Menu.Item name="login" />
+          </Link>
+        )}
       </Menu.Menu>
     </Menu>
   );

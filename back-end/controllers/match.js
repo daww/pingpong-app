@@ -4,6 +4,11 @@ const trueSkill = require('com.izaakschroeder.trueskill').create();
 
 const match = {
   registerMatch: async (playerOneId, playerTwoId, games) => {
+    let playerOneWins = 0,
+      playerOneLosses = 0,
+      playerTwoWins = 0,
+      playerTwoLosses = 0;
+
     const playerOne = await User.findById(
       playerOneId,
       'username rating _id',
@@ -37,8 +42,12 @@ const match = {
         let newRating;
         if (game.playerOneScore > game.playerTwoScore) {
           newRating = trueSkill.update(players, [1, 0]);
+          playerOneWins += 1;
+          playerTwoLosses += 1;
         } else if (game.playerTwoScore > game.playerOneScore) {
           newRating = trueSkill.update(players, [0, 1]);
+          playerOneLosses += 1;
+          playerTwoWins += 1;
         }
         players[0][0].rating = newRating[0][0];
         players[1][0].rating = newRating[1][0];
@@ -78,6 +87,8 @@ const match = {
           user.set({
             rating: userRating.slice(0, 9),
             matches: user.matches.push(matchId),
+            setsWon: user.setsWon + playerOneWins,
+            setsLost: user.setsLost + playerOneLosses,
           });
           user.save((err) => {
             if (err) {
@@ -100,6 +111,8 @@ const match = {
           user.set({
             rating: userRating.slice(0, 9),
             matches: user.matches.push(matchId),
+            setsWon: user.setsWon + playerTwoWins,
+            setsLost: user.setsLost + playerTwoLosses,
           });
           user.save((err) => {
             if (err) {

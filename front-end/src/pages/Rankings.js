@@ -2,6 +2,7 @@ import _ from "lodash";
 import axios from "axios";
 import React, { Component } from "react";
 import { Table } from "semantic-ui-react";
+import { Link } from "react-router-dom";
 
 export default class Rankings extends Component {
   state = {
@@ -77,7 +78,9 @@ export default class Rankings extends Component {
             <Table.Body>
               {_.map(data, ({ mu, sigma, username, _id }) => (
                 <Table.Row key={_id}>
-                  <Table.Cell>{username}</Table.Cell>
+                  <Table.Cell>
+                    <Link to={`/user/${_id}`}>{username}</Link>
+                  </Table.Cell>
                   <Table.Cell>{mu}</Table.Cell>
                   <Table.Cell>{sigma}</Table.Cell>
                 </Table.Row>

@@ -31,9 +31,9 @@ router.post('/editprofile', async (req, res) => {
   const token = getToken(req.headers);
 
   if (token) {
-    const updatedUser = await userController.register(req.body.userId, {
+    const updatedUser = await userController.editProfile(req.body.userId, {
       nickName: req.body.nickName,
-      firstkName: req.body.firstName,
+      firstName: req.body.firstName,
       lastName: req.body.lastName,
     });
     res.send(updatedUser);
@@ -45,7 +45,7 @@ router.post('/editprofile', async (req, res) => {
 router.post('/login', passport.authenticate('local'), (req, res) => {
   const token = JSON.stringify(jwt.sign(req.body.username, 'poepchinees'));
   // return the information including token as JSON
-  res.json({ success: true, token: `JWT ${token}` });
+  res.json({ success: true, token: `JWT ${token}`, userId: req.user._id });
 });
 
 router.get('/logout', (req, res) => {
@@ -58,6 +58,21 @@ router.get('/users', (req, res) => {
 
   if (token) {
     User.find((err, results) => {
+      if (err) {
+        return console.log(err);
+      }
+      res.send(JSON.stringify(results));
+    });
+  } else {
+    return res.status(403).send({ success: false, msg: 'Unauthorized.' });
+  }
+});
+
+router.post('/user', (req, res) => {
+  const token = getToken(req.headers);
+
+  if (token) {
+    User.findById(req.body.userId, (err, results) => {
       if (err) {
         return console.log(err);
       }
