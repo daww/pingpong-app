@@ -55,6 +55,7 @@ const match = {
 
       const newMatch = new Match({
         date: Date.now(),
+        loggedBy: playerOne._id,
         playerOne: {
           id: playerOne._id,
           ratingBefore: playerOne.rating[0],
@@ -68,11 +69,11 @@ const match = {
         results: games,
       });
 
-      newMatch.save((err, match) => {
+      newMatch.save((err, addedMatch) => {
         if (err) {
           console.log(err);
         }
-        const matchId = match._id;
+        const matchId = addedMatch._id;
         // res.send(console.log('Game saved.'));
         console.log('Game saved.');
 
@@ -84,9 +85,11 @@ const match = {
           }
           const userRating = user.rating;
           userRating.unshift(players[0][0].rating);
+          const userMatches = user.matches;
+          userMatches.push(matchId);
           user.set({
             rating: userRating.slice(0, 9),
-            matches: user.matches.push(matchId),
+            matches: userMatches,
             setsWon: user.setsWon + playerOneWins,
             setsLost: user.setsLost + playerOneLosses,
           });
@@ -108,9 +111,11 @@ const match = {
 
           const userRating = user.rating;
           userRating.unshift(players[1][0].rating);
+          const userMatches = user.matches;
+          userMatches.push(matchId);
           user.set({
             rating: userRating.slice(0, 9),
-            matches: user.matches.push(matchId),
+            matches: userMatches,
             setsWon: user.setsWon + playerTwoWins,
             setsLost: user.setsLost + playerTwoLosses,
           });

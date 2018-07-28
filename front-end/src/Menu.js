@@ -15,6 +15,9 @@ export default props => {
       <Link to="/duorankings">
         <Menu.Item name="duorankings" active={activeItem === "duorankings"} />
       </Link>
+      <Link to="/newmatch">
+        <Menu.Item name="newmatch" active={activeItem === "newmatch"} />
+      </Link>
       <Menu.Menu position="right">
         {isAuthenticated ? (
           <React.Fragment>

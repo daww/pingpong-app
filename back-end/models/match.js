@@ -4,6 +4,7 @@ const Schema = mongoose.Schema;
 
 const Match = new Schema({
   date: String,
+  loggedBy: String,
   playerOne: {
     id: String,
     ratingBefore: Object,

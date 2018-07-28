@@ -8,11 +8,9 @@ import {
 } from "react-router-dom";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
-import Rankings from "./pages/Rankings";
-import DuoRankings from "./pages/DuoRankings";
-import UserDetail from "./pages/UserDetail";
-import Preferences from "./pages/Preferences";
+
 import PrivateRoute from "./PrivateRoute";
+import MainRouter from "./MainRouter";
 import Menu from "./Menu";
 import axios from "axios";
 import { Container } from "semantic-ui-react";
@@ -130,24 +128,11 @@ class App extends React.Component {
               )}
             />
             <PrivateRoute
-              path="/rankings"
+              path="/"
               isAuthenticated={this.state.isAuthenticated}
-              component={Rankings}
-            />
-            <PrivateRoute
-              path="/duorankings"
-              isAuthenticated={this.state.isAuthenticated}
-              component={DuoRankings}
-            />
-            <PrivateRoute
-              path="/user/:id"
-              isAuthenticated={this.state.isAuthenticated}
-              component={UserDetail}
-            />
-            <PrivateRoute
-              path="/preferences/:id"
-              isAuthenticated={this.state.isAuthenticated}
-              component={Preferences}
+              userId={this.state.userId}
+              userName={this.state.username}
+              component={MainRouter}
             />
           </Container>
         </div>
