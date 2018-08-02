@@ -5,6 +5,7 @@ const userController = require('./controllers/user');
 const matchController = require('./controllers/match');
 const duoMatchController = require('./controllers/duomatch');
 const User = require('./models/user');
+const Match = require('./models/match');
 
 const getToken = (headers) => {
   if (headers && headers.authorization) {
@@ -129,6 +130,32 @@ router.post('/registerduomatch', async (req, res) => {
       req.body.games,
     );
     res.send(match);
+  } else {
+    return res.status(403).send({ success: false, msg: 'Unauthorized.' });
+  }
+});
+
+router.get('/matches', async (req, res) => {
+  const token = getToken(req.headers);
+
+  if (token) {
+    const matches = await matchController.getAllMatches();
+    res.send(JSON.stringify(matches));
+  } else {
+    return res.status(403).send({ success: false, msg: 'Unauthorized.' });
+  }
+});
+
+router.post('/match', (req, res) => {
+  const token = getToken(req.headers);
+
+  if (token) {
+    Match.findById(req.body.matchId, (err, results) => {
+      if (err) {
+        return console.log(err);
+      }
+      res.send(JSON.stringify(results));
+    });
   } else {
     return res.status(403).send({ success: false, msg: 'Unauthorized.' });
   }

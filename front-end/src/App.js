@@ -13,7 +13,7 @@ import PrivateRoute from "./PrivateRoute";
 import MainRouter from "./MainRouter";
 import Menu from "./Menu";
 import axios from "axios";
-import { Container } from "semantic-ui-react";
+import { Container, Grid } from "semantic-ui-react";
 import "semantic-ui-css/semantic.min.css";
 
 class App extends React.Component {
@@ -30,6 +30,21 @@ class App extends React.Component {
     const userName = localStorage.getItem("userName");
     const userId = localStorage.getItem("userId");
     const token = localStorage.getItem("jwtToken");
+
+    if (token) {
+      axios
+        .get("http://localhost:9000/users")
+        .then(response => {
+          // console.log(response);
+
+          this.setState({
+            userData: response.data
+          });
+        })
+        .catch(err => {
+          console.log(err);
+        });
+    }
 
     this.setState({
       isAuthenticated: token ? token : null,
@@ -59,10 +74,21 @@ class App extends React.Component {
         localStorage.setItem("jwtToken", response.data.token);
         localStorage.setItem("userName", this.state.username);
         localStorage.setItem("userId", response.data.userId);
-        this.setState({
-          isAuthenticated: true,
-          userId: response.data.userId
-        });
+        const loginRes = response.data;
+        axios
+          .get("http://localhost:9000/users")
+          .then(response => {
+            // console.log(response);
+
+            this.setState({
+              userData: response.data,
+              isAuthenticated: true,
+              userId: loginRes.userId
+            });
+          })
+          .catch(err => {
+            console.log(err);
+          });
       })
       .catch(error => {
         console.log(error);
@@ -92,55 +118,57 @@ class App extends React.Component {
   render() {
     return (
       <Router>
-        <div>
-          <Menu
-            activeItem={"bla"}
-            isAuthenticated={this.state.isAuthenticated}
-            onLogout={this.onLogout}
-            userName={this.state.username}
-            userId={this.state.userId}
-          />
-
-          <Container>
-            <Route
-              path="/register"
-              render={props => (
-                <Register
-                  username={this.state.username}
-                  password={this.state.password}
-                  onRegisterClick={this.onRegisterClick}
-                  onFormItemChange={this.onFormItemChange}
-                  {...props}
-                />
-              )}
-            />
-            <Route
-              path="/login"
-              render={props => (
-                <Login
-                  username={this.state.username}
-                  password={this.state.password}
-                  onLoginClick={this.onLoginClick}
-                  isAuthenticated={this.state.isAuthenticated}
-                  onFormItemChange={this.onFormItemChange}
-                  {...props}
-                />
-              )}
-            />
-            <PrivateRoute
-              path="/"
-              isAuthenticated={this.state.isAuthenticated}
-              userId={this.state.userId}
-              userName={this.state.username}
-              component={MainRouter}
-            />
-          </Container>
-        </div>
+        <Container>
+          <Grid stretched={true} centered={true} columns={2}>
+            <Grid.Column width={"four"}>
+              <Menu
+                activeItem={"bla"}
+                isAuthenticated={this.state.isAuthenticated}
+                onLogout={this.onLogout}
+                userName={this.state.username}
+                userId={this.state.userId}
+              />
+            </Grid.Column>
+            <Grid.Column width={"twelve"} stretched={true}>
+              <Route
+                path="/register"
+                render={props => (
+                  <Register
+                    username={this.state.username}
+                    password={this.state.password}
+                    onRegisterClick={this.onRegisterClick}
+                    onFormItemChange={this.onFormItemChange}
+                    {...props}
+                  />
+                )}
+              />
+              <Route
+                path="/login"
+                render={props => (
+                  <Login
+                    username={this.state.username}
+                    password={this.state.password}
+                    onLoginClick={this.onLoginClick}
+                    isAuthenticated={this.state.isAuthenticated}
+                    onFormItemChange={this.onFormItemChange}
+                    {...props}
+                  />
+                )}
+              />
+              <PrivateRoute
+                path="/"
+                isAuthenticated={this.state.isAuthenticated}
+                userId={this.state.userId}
+                userName={this.state.username}
+                userData={this.state.userData}
+                component={MainRouter}
+              />
+            </Grid.Column>
+          </Grid>
+        </Container>
       </Router>
     );
   }
 }
-
-const Protected = () => <h3>Protected</h3>;
 
 export default App;

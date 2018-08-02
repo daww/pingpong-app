@@ -130,6 +130,16 @@ const match = {
       });
     }
   },
+
+  getAllMatches: async () => {
+    const result = await Match.find((err, results) => {
+      if (err) {
+        return null;
+      }
+      return results;
+    });
+    return result;
+  },
 };
 
 module.exports = match;

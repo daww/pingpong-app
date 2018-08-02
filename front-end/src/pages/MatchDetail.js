@@ -3,7 +3,7 @@ import axios from "axios";
 import React, { Component } from "react";
 import { Table } from "semantic-ui-react";
 
-export default class UserDetail extends Component {
+export default class MatchDetail extends Component {
   state = {
     column: null,
     user: null,
@@ -11,12 +11,12 @@ export default class UserDetail extends Component {
   };
   componentDidMount = () => {
     axios
-      .post("http://localhost:9000/user", {
-        userId: this.props.match.params.id
+      .post("http://localhost:9000/match", {
+        matchId: this.props.match.params.id
       })
       .then(response => {
         this.setState({
-          user: response.data
+          match: response.data
         });
       })
       .catch(err => {
@@ -43,15 +43,15 @@ export default class UserDetail extends Component {
     });
   };
   render() {
-    const { column, user, direction } = this.state;
+    const { column, match, direction } = this.state;
 
     return (
       <React.Fragment>
         <ul>
-          {user &&
-            Object.keys(user).map(item => (
+          {match &&
+            Object.keys(match).map(item => (
               <li>
-                {item} - {JSON.stringify(user[item])}
+                {item} - {JSON.stringify(match[item])}
               </li>
             ))}
         </ul>
