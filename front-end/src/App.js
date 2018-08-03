@@ -4,7 +4,8 @@ import {
   Route,
   Link,
   Redirect,
-  withRouter
+  withRouter,
+  Switch
 } from "react-router-dom";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -130,6 +131,7 @@ class App extends React.Component {
               />
             </Grid.Column>
             <Grid.Column width={"twelve"} stretched={true}>
+              <Switch>
               <Route
                 path="/register"
                 render={props => (
@@ -155,14 +157,18 @@ class App extends React.Component {
                   />
                 )}
               />
-              <PrivateRoute
-                path="/"
-                isAuthenticated={this.state.isAuthenticated}
-                userId={this.state.userId}
-                userName={this.state.username}
-                userData={this.state.userData}
-                component={MainRouter}
-              />
+              {this.state.isAuthenticated &&
+                <PrivateRoute
+                  path="/"
+                  isAuthenticated={this.state.isAuthenticated}
+                  userId={this.state.userId}
+                  userName={this.state.username}
+                  userData={this.state.userData}
+                  component={MainRouter}
+                />
+              
+              }
+              </Switch>
             </Grid.Column>
           </Grid>
         </Container>
