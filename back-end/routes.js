@@ -1,6 +1,8 @@
 const passport = require('passport');
 const router = require('express').Router();
 const jwt = require('jsonwebtoken');
+const multer = require('multer');
+const uuidv4 = require('uuid/v4');
 const userController = require('./controllers/user');
 const matchController = require('./controllers/match');
 const duoMatchController = require('./controllers/duomatch');
@@ -18,6 +20,33 @@ const getToken = (headers) => {
   return null;
 };
 
+// configure storage
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    /*
+      Files will be saved in the 'uploads' directory. Make
+      sure this directory already exists!
+    */
+
+    cb(null, './uploads/');
+  },
+  filename: (req, file, cb) => {
+    /*
+      uuidv4() will generate a random ID that we'll use for the
+      new filename. We use path.extname() to get
+      the extension from the original file name and add that to the new
+      generated ID. These combined will create the file name used
+      to save the file on the server and will be available as
+      req.file.pathname in the router handler.
+    */
+
+    const newFilename = file.originalname;
+    cb(null, newFilename);
+  },
+});
+
+const upload = multer({ storage });
+
 // router.get('/', (req, res) => {
 //   res.render('index', { user: req.user });
 // });
@@ -28,7 +57,7 @@ router.post('/register', async (req, res, next) => {
   res.send(user);
 });
 
-router.post('/editprofile', async (req, res) => {
+router.post('/editprofile', upload.single('photo'), async (req, res) => {
   const token = getToken(req.headers);
 
   if (token) {
@@ -36,6 +65,7 @@ router.post('/editprofile', async (req, res) => {
       nickName: req.body.nickName,
       firstName: req.body.firstName,
       lastName: req.body.lastName,
+      photo: req.file.path ? req.file.path : null,
     });
     res.send(updatedUser);
   } else {
@@ -154,7 +184,7 @@ router.post('/match', (req, res) => {
       if (err) {
         return console.log(err);
       }
-      res.send(JSON.stringify(results));
+      return res.send(JSON.stringify(results));
     });
   } else {
     return res.status(403).send({ success: false, msg: 'Unauthorized.' });

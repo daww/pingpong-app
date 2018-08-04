@@ -1,13 +1,18 @@
 import React from "react";
 import axios from "axios";
-import { Form, Button } from "semantic-ui-react";
+import { Message, Form, Button } from "semantic-ui-react";
 
 class Login extends React.Component {
+  constructor() {
+    super();
+    this.fileInput = React.createRef();
+  }
   state = {
     nickName: "",
     firstName: "",
     lastName: "",
-    photo: null
+    photo: null,
+    imageValid: true
   };
   componentDidMount = () => {
     axios
@@ -38,22 +43,53 @@ class Login extends React.Component {
     });
   };
 
+  onProfileUpload = event => {
+    const file = this.fileInput.current.files[0];
+    if (!file.type.includes("image")) {
+      // not an image
+      console.log("not an image");
+      this.fileInput.current.value = "";
+      this.setState({
+        imageValid: true
+      });
+    } else {
+      const fileReader = new FileReader();
+      fileReader.onload = read => {
+        const img = new Image();
+        img.onload = () => {
+          if (img.width <= 500 && img.height <= 500) {
+            this.setState({
+              imageValid: true
+            });
+          } else {
+            this.setState({
+              imageValid: false
+            });
+          }
+        };
+        img.src = read.target.result;
+      };
+      fileReader.readAsDataURL(file);
+    }
+  };
+
   onSubmit = () => {
+    const formData = new FormData();
+    formData.append("userId", this.props.match.params.id);
+    this.state.nickName && formData.append("nickName", this.state.nickName);
+    this.state.firstName && formData.append("firstName", this.state.firstName);
+    this.state.lastName && formData.append("lastName", this.state.lastName);
+    this.state.imageValid &&
+      formData.append("photo", this.fileInput.current.files[0]);
     axios
-      .post("http://localhost:9000/editprofile", {
-        userId: this.props.match.params.id,
-        nickName: this.state.nickName ? this.state.nickName : null,
-        firstName: this.state.firstName ? this.state.firstName : null,
-        lastName: this.state.lastName ? this.state.lastName : null
-      })
+      .post("http://localhost:9000/editprofile", formData)
       .then(response => {
         // console.log(response.data);
-
-        this.setState({
-          nickName: response.data.nickName ? response.data.nickName : "",
-          firstName: response.data.firstName ? response.data.firstName : "",
-          lastName: response.data.lastName ? response.data.lastName : ""
-        });
+        // this.setState({
+        //   nickName: response.data.nickName ? response.data.nickName : "",
+        //   firstName: response.data.firstName ? response.data.firstName : "",
+        //   lastName: response.data.lastName ? response.data.lastName : ""
+        // });
       })
       .catch(err => {
         console.log(err);
@@ -63,8 +99,8 @@ class Login extends React.Component {
   render() {
     return (
       <div>
-        <h3>Account preferences </h3>
-        <Form>
+        <Message header="Account preferences" attached />
+        <Form className="attached fluid segment">
           <Form.Field>
             <label>First Name</label>
             <input
@@ -92,8 +128,20 @@ class Login extends React.Component {
               value={this.state.nickName}
             />
           </Form.Field>
+          <Form.Field>
+            <label>Profile picture (max 500x500)</label>
+            <input
+              type="file"
+              ref={this.fileInput}
+              // name="nickName"
+              onChange={this.onProfileUpload}
+              // value={this.state.nickName}
+            />
+          </Form.Field>
 
-          <Button onClick={this.onSubmit}>Submit</Button>
+          <Button disabled={!this.state.imageValid} onClick={this.onSubmit}>
+            Submit
+          </Button>
         </Form>
       </div>
     );

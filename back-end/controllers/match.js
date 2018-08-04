@@ -128,6 +128,7 @@ const match = {
           });
         });
       });
+      return newMatch;
     }
   },
 

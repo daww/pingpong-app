@@ -1,6 +1,5 @@
 import React from "react";
-import { Grid, Dropdown, GridRow } from "semantic-ui-react";
-import { Input, Button } from "semantic-ui-react";
+import { Form, Message, Button } from "semantic-ui-react";
 import axios from "axios";
 
 class NewMatch extends React.Component {
@@ -79,48 +78,41 @@ class NewMatch extends React.Component {
   render() {
     return (
       <div>
-        <h3>Log game</h3>
+        <Message attached header="Log new game" />
         {this.state.opponents && (
-          <React.Fragment>
-            <Grid columns={2} divided>
-              <Grid.Row>
-                <Grid.Column>You</Grid.Column>
-                <Grid.Column>
-                  <Dropdown
-                    placeholder="Select Opponent"
-                    fluid
-                    search
-                    selection
-                    options={this.state.opponents}
-                    onChange={this.onOpponentChange}
-                  />
-                </Grid.Column>
-              </Grid.Row>
-              {this.state.games.map((game, index) => (
-                <Grid.Row key={index}>
-                  <Grid.Column>
-                    <Input
-                      type="number"
-                      placeholder="0"
-                      name={index + "playerOneScore"}
-                      onChange={this.onChange}
-                      value={game.playerOneScore}
-                    />
-                  </Grid.Column>
-                  <Grid.Column>
-                    <Input
-                      type="number"
-                      placeholder="0"
-                      name={index + "playerTwoScore"}
-                      onChange={this.onChange}
-                      value={game.playerTwoScore}
-                    />
-                  </Grid.Column>
-                </Grid.Row>
-              ))}
-            </Grid>
+          <Form className="attached fluid segment">
+            <Form.Group widths="equal">
+              <Form.Input value="You" disabled />
+              <Form.Select
+                placeholder="Select Opponent"
+                fluid
+                search
+                selection
+                options={this.state.opponents}
+                onChange={this.onOpponentChange}
+              />
+            </Form.Group>
+            {this.state.games.map((game, index) => (
+              <Form.Group widths="equal" key={index}>
+                <Form.Input
+                  type="number"
+                  placeholder="0"
+                  name={index + "playerOneScore"}
+                  onChange={this.onChange}
+                  value={game.playerOneScore}
+                />
+
+                <Form.Input
+                  type="number"
+                  placeholder="0"
+                  name={index + "playerTwoScore"}
+                  onChange={this.onChange}
+                  value={game.playerTwoScore}
+                />
+              </Form.Group>
+            ))}
             <Button onClick={this.onRegister}>Register</Button>
-          </React.Fragment>
+          </Form>
         )}
       </div>
     );

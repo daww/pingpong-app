@@ -27,6 +27,7 @@ const userController = {
       if (err) {
         return console.log('Could not retrieve user');
       }
+
       user.set({
         ...userData,
       });
