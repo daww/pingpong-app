@@ -1,6 +1,6 @@
 import React from "react";
 import { Redirect, Link } from "react-router-dom";
-import { Input, Button } from "semantic-ui-react";
+import { Input, Button } from "antd";
 
 class Login extends React.Component {
   render() {

@@ -1,7 +1,6 @@
 import _ from "lodash";
 import axios from "axios";
 import React, { Component } from "react";
-import { Table } from "semantic-ui-react";
 
 export default class UserDetail extends Component {
   state = {

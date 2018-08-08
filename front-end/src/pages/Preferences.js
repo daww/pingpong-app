@@ -1,6 +1,6 @@
 import React from "react";
 import axios from "axios";
-import { Message, Form, Button } from "semantic-ui-react";
+import { Form, Icon, Input, Button } from "antd";
 
 class Login extends React.Component {
   constructor() {
@@ -99,9 +99,8 @@ class Login extends React.Component {
   render() {
     return (
       <div>
-        <Message header="Account preferences" attached />
         <Form className="attached fluid segment">
-          <Form.Field>
+          <Form.Item>
             <label>First Name</label>
             <input
               placeholder="First Name"
@@ -109,8 +108,8 @@ class Login extends React.Component {
               onChange={this.onChange}
               value={this.state.firstName}
             />
-          </Form.Field>
-          <Form.Field>
+          </Form.Item>
+          <Form.Item>
             <label>Last Name</label>
             <input
               placeholder="Last Name"
@@ -118,8 +117,8 @@ class Login extends React.Component {
               onChange={this.onChange}
               value={this.state.lastName}
             />
-          </Form.Field>
-          <Form.Field>
+          </Form.Item>
+          <Form.Item>
             <label>Nick Name</label>
             <input
               placeholder="Nick Name"
@@ -127,8 +126,8 @@ class Login extends React.Component {
               onChange={this.onChange}
               value={this.state.nickName}
             />
-          </Form.Field>
-          <Form.Field>
+          </Form.Item>
+          <Form.Item>
             <label>Profile picture (max 500x500)</label>
             <input
               type="file"
@@ -137,7 +136,7 @@ class Login extends React.Component {
               onChange={this.onProfileUpload}
               // value={this.state.nickName}
             />
-          </Form.Field>
+          </Form.Item>
 
           <Button disabled={!this.state.imageValid} onClick={this.onSubmit}>
             Submit

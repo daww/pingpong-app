@@ -14,14 +14,16 @@ import PrivateRoute from "./PrivateRoute";
 import MainRouter from "./MainRouter";
 import Menu from "./Menu";
 import axios from "axios";
-import { Container, Grid } from "semantic-ui-react";
-import "semantic-ui-css/semantic.min.css";
+import { Layout } from "antd";
+import "antd/dist/antd.css";
+const { Header, Content, Sider } = Layout;
 
 class App extends React.Component {
   state = {
     username: "",
     password: "",
-    isAuthenticated: false
+    isAuthenticated: false,
+    collapsed: false
   };
 
   componentDidMount = () => {
@@ -52,6 +54,11 @@ class App extends React.Component {
       username: userName ? userName : null,
       userId: userId ? userId : null
     });
+  };
+
+  onCollapse = collapsed => {
+    // console.log(collapsed);
+    this.setState({ collapsed });
   };
 
   onLogout = () => {
@@ -119,59 +126,63 @@ class App extends React.Component {
   render() {
     return (
       <Router>
-        <Container>
-          <Grid stretched={true} centered={true} columns={2}>
-            <Grid.Column width={"four"}>
-              <Menu
-                activeItem={"bla"}
-                isAuthenticated={this.state.isAuthenticated}
-                onLogout={this.onLogout}
-                userName={this.state.username}
-                userId={this.state.userId}
-              />
-            </Grid.Column>
-            <Grid.Column width={"twelve"} stretched={true}>
+        <Layout style={{ minHeight: "100vh" }}>
+          <Sider
+            collapsible
+            collapsed={this.state.collapsed}
+            onCollapse={this.onCollapse}
+          >
+            <Menu
+              activeItem={"bla"}
+              isAuthenticated={this.state.isAuthenticated}
+              onLogout={this.onLogout}
+              userName={this.state.username}
+              userId={this.state.userId}
+            />
+          </Sider>
+          <Layout>
+            <Header style={{ background: "#fff", padding: 0 }} />
+            <Content style={{ margin: "0 16px" }}>
               <Switch>
-              <Route
-                path="/register"
-                render={props => (
-                  <Register
-                    username={this.state.username}
-                    password={this.state.password}
-                    onRegisterClick={this.onRegisterClick}
-                    onFormItemChange={this.onFormItemChange}
-                    {...props}
-                  />
-                )}
-              />
-              <Route
-                path="/login"
-                render={props => (
-                  <Login
-                    username={this.state.username}
-                    password={this.state.password}
-                    onLoginClick={this.onLoginClick}
-                    isAuthenticated={this.state.isAuthenticated}
-                    onFormItemChange={this.onFormItemChange}
-                    {...props}
-                  />
-                )}
-              />
-              {this.state.isAuthenticated &&
-                <PrivateRoute
-                  path="/"
-                  isAuthenticated={this.state.isAuthenticated}
-                  userId={this.state.userId}
-                  userName={this.state.username}
-                  userData={this.state.userData}
-                  component={MainRouter}
+                <Route
+                  path="/register"
+                  render={props => (
+                    <Register
+                      username={this.state.username}
+                      password={this.state.password}
+                      onRegisterClick={this.onRegisterClick}
+                      onFormItemChange={this.onFormItemChange}
+                      {...props}
+                    />
+                  )}
                 />
-              
-              }
+                <Route
+                  path="/login"
+                  render={props => (
+                    <Login
+                      username={this.state.username}
+                      password={this.state.password}
+                      onLoginClick={this.onLoginClick}
+                      isAuthenticated={this.state.isAuthenticated}
+                      onFormItemChange={this.onFormItemChange}
+                      {...props}
+                    />
+                  )}
+                />
+                {this.state.isAuthenticated && (
+                  <PrivateRoute
+                    path="/"
+                    isAuthenticated={this.state.isAuthenticated}
+                    userId={this.state.userId}
+                    userName={this.state.username}
+                    userData={this.state.userData}
+                    component={MainRouter}
+                  />
+                )}
               </Switch>
-            </Grid.Column>
-          </Grid>
-        </Container>
+            </Content>
+          </Layout>
+        </Layout>
       </Router>
     );
   }

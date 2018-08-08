@@ -1,8 +1,8 @@
 import _ from "lodash";
 import axios from "axios";
 import React, { Component } from "react";
-import { Table } from "semantic-ui-react";
 import { Link } from "react-router-dom";
+import { Table } from "antd";
 
 class Matches extends Component {
   state = {
@@ -23,8 +23,26 @@ class Matches extends Component {
             item.playerTwoName = this.props.userData.find(
               user => user._id === item.playerTwo.id
             ).username;
+            item.results = this.getSetsResult(item.results);
             return newItem;
-          })
+          }),
+          columns: [
+            {
+              title: "playerOne",
+              dataIndex: "playerOne",
+              key: "playerOne"
+            },
+            {
+              title: "playerTwo",
+              dataIndex: "playerTwo",
+              key: "playerTwo"
+            },
+            {
+              title: "results",
+              dataIndex: "results",
+              key: "results"
+            }
+          ]
         });
       })
       .catch(err => {
@@ -65,54 +83,11 @@ class Matches extends Component {
     return `${playerOneScore} - ${playerTwoScore}`;
   };
   render() {
-    const { column, data, direction } = this.state;
+    const { columns, data } = this.state;
 
     return (
       <React.Fragment>
-        {data && (
-          <Table sortable celled fixed>
-            <Table.Header>
-              <Table.Row>
-                <Table.HeaderCell
-                  sorted={column === "playerOneName" ? direction : null}
-                  onClick={this.handleSort("playerOneName")}
-                >
-                  Player One
-                </Table.HeaderCell>
-                <Table.HeaderCell
-                  sorted={column === "playerTwoName" ? direction : null}
-                  onClick={this.handleSort("playerTwoName")}
-                >
-                  Player Two
-                </Table.HeaderCell>
-                <Table.HeaderCell>Sets</Table.HeaderCell>
-              </Table.Row>
-            </Table.Header>
-            <Table.Body>
-              {_.map(
-                data,
-                ({
-                  _id,
-                  playerOneName,
-                  playerOne,
-                  playerTwoName,
-                  playerTwo,
-                  results
-                }) => (
-                  <Table.Row key={_id}>
-                    <Table.Cell>{playerOneName}</Table.Cell>
-                    <Table.Cell>{playerTwoName}</Table.Cell>
-                    <Table.Cell>
-                      <Link to={`/match/${_id}`}>
-                        {this.getSetsResult(results)}
-                      </Link>
-                    </Table.Cell>
-                  </Table.Row>
-                )
-              )}
-            </Table.Body>
-          </Table>
-        )}
+        {data && <Table columns={columns} dataSource={data} />}
       </React.Fragment>
     );
   }

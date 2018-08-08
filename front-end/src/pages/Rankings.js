@@ -1,7 +1,7 @@
 import _ from "lodash";
 import axios from "axios";
 import React, { Component } from "react";
-import { Table } from "semantic-ui-react";
+import { Table } from "antd";
 import { Link } from "react-router-dom";
 
 export default class Rankings extends Component {
@@ -20,7 +20,27 @@ export default class Rankings extends Component {
             newItem.mu = item.rating[0].mu;
             newItem.sigma = item.rating[0].sigma;
             return newItem;
-          })
+          }),
+          columns: [
+            {
+              title: "username",
+              dataIndex: "username",
+              key: "username",
+              render: (text, record) => (
+                <Link to={`/user/${record._id}`}>{text}</Link>
+              )
+            },
+            {
+              title: "mu",
+              dataIndex: "mu",
+              key: "mu"
+            },
+            {
+              title: "sigma",
+              dataIndex: "sigma",
+              key: "sigma"
+            }
+          ]
         });
       })
       .catch(err => {
@@ -47,47 +67,11 @@ export default class Rankings extends Component {
     });
   };
   render() {
-    const { column, data, direction } = this.state;
+    const { columns, data } = this.state;
 
     return (
       <React.Fragment>
-        {data && (
-          <Table sortable celled fixed>
-            <Table.Header>
-              <Table.Row>
-                <Table.HeaderCell
-                  sorted={column === "username" ? direction : null}
-                  onClick={this.handleSort("username")}
-                >
-                  Username
-                </Table.HeaderCell>
-                <Table.HeaderCell
-                  sorted={column === "mu" ? direction : null}
-                  onClick={this.handleSort("mu")}
-                >
-                  Rating
-                </Table.HeaderCell>
-                <Table.HeaderCell
-                  sorted={column === "sigma" ? direction : null}
-                  onClick={this.handleSort("sigma")}
-                >
-                  Rating confidence
-                </Table.HeaderCell>
-              </Table.Row>
-            </Table.Header>
-            <Table.Body>
-              {_.map(data, ({ mu, sigma, username, _id }) => (
-                <Table.Row key={_id}>
-                  <Table.Cell>
-                    <Link to={`/user/${_id}`}>{username}</Link>
-                  </Table.Cell>
-                  <Table.Cell>{mu}</Table.Cell>
-                  <Table.Cell>{sigma}</Table.Cell>
-                </Table.Row>
-              ))}
-            </Table.Body>
-          </Table>
-        )}
+        {data && <Table columns={columns} dataSource={data} />}
       </React.Fragment>
     );
   }
